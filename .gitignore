@@ -1,0 +1,21 @@
+.DS_Store
+node_modules/
+
+# Anchor / Rust
+# target/ is fully ignored (git can't selectively un-ignore files inside an
+# ignored directory) — the program's deploy keypair is instead tracked at
+# programs/depository/program-keypair.json; copy it into
+# target/deploy/depository-keypair.json before the first `anchor build`
+# on a fresh clone so the program ID stays consistent with declare_id!.
+.anchor/
+target/
+**/*.rs.bk
+test-ledger/
+.yarn/
+
+# Env
+.env
+
+# Depository authority keypairs (mirrors tokenized-deposit-settlement's
+# plan-001.md decision #4: local, plaintext, gitignored)
+keys/
