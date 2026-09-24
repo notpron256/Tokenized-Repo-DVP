@@ -1,5 +1,7 @@
 # Security-leg accounts — Phase 2
 
+**Note (Phase 4 correction):** the example trade's collateral face value was later corrected from $10,204,082 down to $4,081,633 (see spec-001.md's Example trade section — the bank's velocity limit tops out at $5,000,000/hour, making the original $10,000,000 cash leg unmovable). The custodial account below was not re-minted, since its existing balance ($10,204,082.00) already comfortably exceeds the corrected pledge amount ($4,081,633) — a custodian legitimately holding more securities than are pledged in any one trade is realistic, not an error. Phase 4 pledges exactly $4,081,633 of this account's balance, leaving the rest unpledged.
+
 Produced by `npm run create-security-mint` (plan-001.md Phase 2), run against the **local validator** (`http://127.0.0.1:8899`) — local-first through Phase 3, per plan-001.md's Structural decision. This same script will need to be re-run pointed at devnet (`SOLANA_RPC_URL=https://api.devnet.solana.com`) before Phase 4, since the real cross-institution transaction needs this security position to exist on devnet too.
 
 - Security mint (base SPL Token, decimals 2 — plan-001.md Ambiguity #1): `HY1kMJAVjqvwiBjDkZWYNdBqPGCB3izQpCLkzKL2RhA2`
