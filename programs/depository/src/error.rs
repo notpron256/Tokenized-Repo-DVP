@@ -4,4 +4,10 @@ use anchor_lang::prelude::*;
 pub enum DepositoryError {
     #[msg("security_id must be at most 9 characters")]
     SecurityIdTooLong,
+    #[msg("Trade is not open")]
+    TradeNotOpen,
+    #[msg("Collateral is not currently at the Seller's custodied account")]
+    CollateralNotAtSeller,
+    #[msg("Provided account does not match the trade-state's recorded account")]
+    AccountMismatch,
 }

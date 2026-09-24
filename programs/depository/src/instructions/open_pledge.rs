@@ -16,14 +16,9 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
 use anchor_lang::solana_program::program::invoke;
 
+use crate::constants::DEPOSITORY_AUTHORITY_SEED;
 use crate::error::DepositoryError;
 use crate::state::{CollateralLocation, DayCount, TradeState, TradeStatus};
-
-/// Single, fixed, program-wide delegate authority — mirrors
-/// redemption-gateway's GATEWAY_SEED pattern (spec-001.md's `Approve` is
-/// scoped by the (owner, amount) pair per trade; the delegate address
-/// itself doesn't need to vary per trade).
-pub const DEPOSITORY_AUTHORITY_SEED: &[u8] = b"depository-authority";
 
 /// Base SPL Token `Approve` instruction tag (TokenInstruction::Approve).
 const APPROVE_DISCRIMINATOR: u8 = 4;

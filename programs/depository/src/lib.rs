@@ -5,6 +5,7 @@
 
 use anchor_lang::prelude::*;
 
+pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
@@ -43,6 +44,12 @@ pub mod depository {
             scheduled_close_unix,
             rate_bps,
         )
+    }
+
+    /// Phase 5 (plan-001.md): rehypothecation exercise, mid-trade.
+    /// See instructions::exercise_rehypothecation::handler.
+    pub fn exercise_rehypothecation(ctx: Context<ExerciseRehypothecation>, decimals: u8) -> Result<()> {
+        instructions::exercise_rehypothecation::handler(ctx, decimals)
     }
 }
 
