@@ -66,15 +66,19 @@ const MEMO_PROGRAM_V3 = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfc
 const BUYER_CLIENT_ID = "22056748-4d61-4413-ac87-db38b012f427";
 const SELLER_CLIENT_ID = "6e6be62e-48da-454b-8d7a-eb24844eb548";
 
-// spec-001.md, Example trade (corrected twice — see spec-001.md's Example
-// trade section: $10M exceeded the Buyer's velocity cap; the first fix to
-// $4M then exceeded the Seller's own, lower, medium-risk cap on the close
-// leg. This figure clears both parties' caps with real margin).
+// Operational default for trades opened from here on (distinct from
+// spec-001.md's documented $1,000,000 canonical Example trade, which
+// stays as the historical record of what Phases 4-6 actually proved).
+// Sized at $500k, well under half of the Seller's $2,000,000/hour
+// velocity cap, specifically to leave real headroom for running several
+// fresh trades in the same hour across later phases without hitting a
+// window limit — see spec-001.md's Example trade section for the full
+// history of why $10M and then $4M both failed on velocity grounds.
 const SECURITY_ID = "912797FA9"; // placeholder CUSIP
-const FACE_VALUE_RAW = 102_040_900n; // $1,020,409 @ 2 decimals
-const VALID_CASH_AMOUNT_RAW = 100_000_000n; // $1,000,000.00 @ 2 decimals
+const FACE_VALUE_RAW = 51_020_500n; // $510,205 @ 2 decimals (~2% haircut on $500,000)
+const VALID_CASH_AMOUNT_RAW = 50_000_000n; // $500,000.00 @ 2 decimals
 const NEGATIVE_TEST_CASH_AMOUNT_RAW = 1_000_000_000n; // $10,000,000.00 — the original, doubly-invalid figure; trips the bank's velocity cap by construction regardless of which party's tier applies
-const CLOSE_CASH_AMOUNT_RAW = 100_010_139n; // $1,000,101.39 @ 2 decimals
+const CLOSE_CASH_AMOUNT_RAW = 50_005_069n; // $500,050.69 @ 2 decimals
 const RATE_BPS = 365; // 3.65%
 
 function memoInstruction(text: string): TransactionInstruction {
