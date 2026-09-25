@@ -1,7 +1,7 @@
 # Plan 001: Cross-Institution Atomic DvP Settlement — Build Plan
 
 Author: Sebastian Higgs (via Claude Code)
-Status: Approved — Phase 0 in progress
+Status: Complete — all 10 phases (0-9) built and verified on devnet
 Source: [intent/intent-001.md](../intent/intent-001.md), [spec/spec-001.md](../spec/spec-001.md)
 
 ## Context
