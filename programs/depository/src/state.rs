@@ -46,8 +46,30 @@ pub enum TradeStatus {
     BuyerDefaulted,
 }
 
+/// Pure physical placement, never conflated with trade lifecycle (that's
+/// TradeStatus's job — see its four values, which already fully and
+/// unambiguously distinguish Open/Closed/SellerDefaulted/BuyerDefaulted
+/// without any help from this enum). A new variant here is warranted
+/// only when the actual custody account changes and an existing value
+/// would become a false statement about where the tokens are — not
+/// merely because a new trade-lifecycle status was added.
+///
+/// AtBuyerUse deliberately covers both "Open, voluntarily rehypothecated"
+/// and "BuyerDefaulted" — both are physically identical (the tokens
+/// never move once rehypothecated; a Buyer default is a status-only
+/// trigger, spec-001.md's Ambiguity #4, so nothing here needs to change
+/// when it fires). AtSeller deliberately covers both "Open, never
+/// rehypothecated" and "Closed" — both are physically identical too
+/// (the happy-path close only runs once collateral is already back).
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, InitSpace, PartialEq, Eq)]
 pub enum CollateralLocation {
     AtSeller,
     AtBuyerUse,
+    /// Set only by seller_default_claim — the one case where custody
+    /// genuinely moves to a new account after open, so the prior value
+    /// (AtSeller) would otherwise become false. Self-sufficient: no
+    /// other instruction ever produces this value, so seeing it alone
+    /// already tells you a Seller-default claim occurred, with no need
+    /// to also check status.
+    AtBuyerClaim,
 }

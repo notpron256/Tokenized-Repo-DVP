@@ -20,7 +20,7 @@ import { RPC_URL } from "./lib/authorities.js";
 
 const DAY_COUNT_LABELS = ["Actual360"];
 const STATUS_LABELS = ["Open", "Closed", "SellerDefaulted", "BuyerDefaulted"];
-const COLLATERAL_LOCATION_LABELS = ["AtSeller", "AtBuyerUse"];
+const COLLATERAL_LOCATION_LABELS = ["AtSeller", "AtBuyerUse", "AtBuyerClaim"];
 
 async function main() {
   const addressArg = process.argv[2];

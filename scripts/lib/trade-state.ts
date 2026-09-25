@@ -74,4 +74,4 @@ export async function readTradeState(connection: Connection, address: PublicKey)
 }
 
 export const STATUS_LABELS = ["Open", "Closed", "SellerDefaulted", "BuyerDefaulted"];
-export const COLLATERAL_LOCATION_LABELS = ["AtSeller", "AtBuyerUse"];
+export const COLLATERAL_LOCATION_LABELS = ["AtSeller", "AtBuyerUse", "AtBuyerClaim"];

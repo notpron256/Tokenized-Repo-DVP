@@ -14,10 +14,10 @@
 //! already holds the collateral in their own Buyer's-use account —
 //! there is nothing left here to claim.
 //!
-//! collateral_location is left unchanged (still reads AtSeller) even
-//! though the tokens have physically moved to the claim account — once
-//! status leaves Open, collateral_location is no longer authoritative;
-//! TradeStatus::SellerDefaulted is what actually records what happened.
+//! Sets collateral_location to AtBuyerClaim, since the tokens have
+//! genuinely moved to the claim account and leaving the prior value
+//! (AtSeller) would be a false statement about where they are — see
+//! state.rs's CollateralLocation doc comment for the reasoning.
 
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
@@ -85,6 +85,7 @@ pub fn handler(ctx: Context<SellerDefaultClaim>, decimals: u8) -> Result<()> {
 
     let trade_state = &mut ctx.accounts.trade_state;
     trade_state.status = TradeStatus::SellerDefaulted;
+    trade_state.collateral_location = CollateralLocation::AtBuyerClaim;
 
     Ok(())
 }

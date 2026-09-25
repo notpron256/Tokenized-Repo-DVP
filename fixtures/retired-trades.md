@@ -6,6 +6,10 @@ Opened during Phase 4 at the *first* corrected trade size ($4,000,000 cash / $4,
 
 **Left as-is, not force-closed.** Same honesty pattern as the Buyer's leftover overfunded balance (`fixtures/devnet-accounts.md`): a real artifact of a sizing mistake, documented rather than hidden or silently worked around. This trade's on-chain state stays exactly as it is — `Status: Open`, `Collateral location: AtSeller`, real pledge delegate still active — as a permanent record of the incident.
 
+## Trade `9j6eEh7Lc7MkYNktuf6EtVfAUkzsfSD1agzxGbAXbTKW` — Seller-defaulted under the pre-fix `CollateralLocation` enum
+
+The first real Seller-default claim (Phase 7's "after deadline" done-test), executed successfully before `CollateralLocation` gained its `AtBuyerClaim` variant. Looking this trade up today with `read-trade-state.ts` shows `Status: SellerDefaulted` (accurate) but `Collateral location: AtSeller` (stale/misleading — the collateral actually moved to claim account `BeC82FGUXZ76xKLvLf6NdJcoTmdQzH5v8FBLhyBX4zZv`, confirmed via `spl-token display` at the time). Same precedent as the other retired trades: left exactly as-is, not retrofitted — the on-chain account was already written under the old program logic, and rewriting historical, terminal trade-state accounts to match a later schema fix isn't something this project does. Trade `DQNSNcmis6KsHbWmmyTuCLPNAJ2aQjGVHWgMm37A2fzK` (claim tx `3hDEdneVg7QG8n6nxwXip3TsDTN6dBEaGLEp3oxpKjwh6T5H3tRxeDkb52Yj3obQnzyKKbsXhopgHVi7ooVsTGMn`) is the one that demonstrates the corrected behavior: `Collateral location: AtBuyerClaim`, matching reality.
+
 ## Trade `6BFdXPm11MFcbEEEevgHBdjbxWLKYGXVPoqnrCg65n3R` — the active, correctly-sized trade
 
 Opened and rehypothecated at the second, final corrected size: $1,000,000 cash / $1,020,409 collateral / $1,000,101.39 close — comfortably under both the Buyer's ($5,000,000/hour, low risk) and the Seller's ($2,000,000/hour, medium risk) velocity caps. This is the trade Phase 6 onward actually completes the lifecycle on.
