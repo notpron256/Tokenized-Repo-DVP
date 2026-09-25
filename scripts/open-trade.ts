@@ -89,6 +89,16 @@ async function main() {
   const negativeTest = process.argv.includes("--negative-test");
   const cashAmountRaw = negativeTest ? NEGATIVE_TEST_CASH_AMOUNT_RAW : VALID_CASH_AMOUNT_RAW;
 
+  // Test-only override for Phase 7/8's default-path grace-period checks
+  // (spec-001.md: scheduled close + 1 business day) — lets a fresh trade
+  // be opened already past (or just short of) its deadline without
+  // waiting real calendar time. Defaults to +86400 (a real overnight
+  // term) when omitted.
+  const scheduledCloseOffsetArg = process.argv.find((a) => a.startsWith("--scheduled-close-offset="));
+  const scheduledCloseOffsetSeconds = scheduledCloseOffsetArg
+    ? parseInt(scheduledCloseOffsetArg.split("=")[1], 10)
+    : 86400;
+
   const connection = getConnection();
   if (!connection.rpcEndpoint.includes("devnet")) {
     console.error(`This script must run against devnet (SOLANA_RPC_URL is currently ${connection.rpcEndpoint}).`);
@@ -157,7 +167,7 @@ async function main() {
 
     // --- Leg 2: this repo's open_pledge instruction ---
     const tradeState = Keypair.generate();
-    const scheduledCloseUnix = BigInt(Math.floor(Date.now() / 1000) + 86400);
+    const scheduledCloseUnix = BigInt(Math.floor(Date.now() / 1000) + scheduledCloseOffsetSeconds);
 
     const openPledgeData = Buffer.concat([
       anchorDiscriminator("global", "open_pledge"),

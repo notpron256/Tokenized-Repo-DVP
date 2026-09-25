@@ -2,6 +2,7 @@ pub mod exercise_rehypothecation;
 pub mod open_pledge;
 pub mod release_pledge;
 pub mod return_rehypothecated;
+pub mod seller_default_claim;
 
 // Each instruction module's own `handler` fn is always called fully-
 // qualified (e.g. `instructions::open_pledge::handler(...)`) from
@@ -16,5 +17,6 @@ mod reexports {
     pub use super::open_pledge::*;
     pub use super::release_pledge::*;
     pub use super::return_rehypothecated::*;
+    pub use super::seller_default_claim::*;
 }
 pub use reexports::*;

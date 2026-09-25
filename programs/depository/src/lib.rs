@@ -63,6 +63,12 @@ pub mod depository {
     pub fn release_pledge(ctx: Context<ReleasePledge>) -> Result<()> {
         instructions::release_pledge::handler(ctx)
     }
+
+    /// Phase 7 (plan-001.md): Seller-default claim.
+    /// See instructions::seller_default_claim::handler.
+    pub fn seller_default_claim(ctx: Context<SellerDefaultClaim>, decimals: u8) -> Result<()> {
+        instructions::seller_default_claim::handler(ctx, decimals)
+    }
 }
 
 #[derive(Accounts)]

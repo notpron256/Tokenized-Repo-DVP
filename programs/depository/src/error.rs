@@ -10,6 +10,10 @@ pub enum DepositoryError {
     CollateralNotAtSeller,
     #[msg("Collateral is not currently at the Buyer's-use account")]
     CollateralNotAtBuyerUse,
+    #[msg("The grace-period deadline (scheduled close + 1 business day) has not yet elapsed")]
+    GracePeriodNotElapsed,
+    #[msg("Arithmetic overflow computing the grace-period deadline")]
+    Overflow,
     #[msg("Provided account does not match the trade-state's recorded account")]
     AccountMismatch,
 }
