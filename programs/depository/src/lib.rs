@@ -51,6 +51,18 @@ pub mod depository {
     pub fn exercise_rehypothecation(ctx: Context<ExerciseRehypothecation>, decimals: u8) -> Result<()> {
         instructions::exercise_rehypothecation::handler(ctx, decimals)
     }
+
+    /// Phase 6 (plan-001.md): return of rehypothecated collateral, filling
+    /// Ambiguity #3. See instructions::return_rehypothecated::handler.
+    pub fn return_rehypothecated(ctx: Context<ReturnRehypothecated>, decimals: u8) -> Result<()> {
+        instructions::return_rehypothecated::handler(ctx, decimals)
+    }
+
+    /// Phase 6 (plan-001.md): close-leg pledge release.
+    /// See instructions::release_pledge::handler.
+    pub fn release_pledge(ctx: Context<ReleasePledge>) -> Result<()> {
+        instructions::release_pledge::handler(ctx)
+    }
 }
 
 #[derive(Accounts)]
