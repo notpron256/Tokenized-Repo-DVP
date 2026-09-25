@@ -87,7 +87,17 @@ function memoInstruction(text: string): TransactionInstruction {
 
 async function main() {
   const negativeTest = process.argv.includes("--negative-test");
-  const cashAmountRaw = negativeTest ? NEGATIVE_TEST_CASH_AMOUNT_RAW : VALID_CASH_AMOUNT_RAW;
+
+  // Optional overrides so a caller (e.g. Phase 9's e2e-full-lifecycle.ts)
+  // can reproduce spec-001.md's exact documented $1,000,000 canonical
+  // example precisely, distinct from this script's own $500k operational
+  // default for casual future trades. Ignored when --negative-test is set
+  // (that path always uses the fixed, deliberately-invalid figure).
+  const argValue = (flag: string) => process.argv.find((a) => a.startsWith(`--${flag}=`))?.split("=")[1];
+  const faceValueRaw = argValue("face-value-raw") ? BigInt(argValue("face-value-raw")!) : FACE_VALUE_RAW;
+  const closeCashAmountRaw = argValue("close-cash-amount-raw") ? BigInt(argValue("close-cash-amount-raw")!) : CLOSE_CASH_AMOUNT_RAW;
+  const validCashAmountRaw = argValue("cash-amount-raw") ? BigInt(argValue("cash-amount-raw")!) : VALID_CASH_AMOUNT_RAW;
+  const cashAmountRaw = negativeTest ? NEGATIVE_TEST_CASH_AMOUNT_RAW : validCashAmountRaw;
 
   // Test-only override for Phase 7/8's default-path grace-period checks
   // (spec-001.md: scheduled close + 1 business day) — lets a fresh trade
@@ -172,9 +182,9 @@ async function main() {
     const openPledgeData = Buffer.concat([
       anchorDiscriminator("global", "open_pledge"),
       encodeString(SECURITY_ID),
-      encodeU64(FACE_VALUE_RAW),
-      encodeU64(VALID_CASH_AMOUNT_RAW), // trade-state always records the *intended* $4,000,000 cash amount, even in the negative test
-      encodeU64(CLOSE_CASH_AMOUNT_RAW),
+      encodeU64(faceValueRaw),
+      encodeU64(validCashAmountRaw), // trade-state always records the *intended* cash amount, even in the negative test
+      encodeU64(closeCashAmountRaw),
       encodeI64(scheduledCloseUnix),
       encodeU32(RATE_BPS),
     ]);
