@@ -51,3 +51,22 @@ A load-bearing technical finding, not a design preference: while evaluating whet
 Confidential Transfer does not extend that model to encrypted balances; it replaces the transfer path entirely. Every confidential-holding account needs its own ElGamal/AES keypair and must go through `ConfigureAccount`, then `Deposit`/`ApplyPendingBalance` before funds are spendable, and an actual confidential-to-confidential `Transfer` requires the sender to construct zero-knowledge range and equality proofs — proofs that assert facts about ciphertexts the prover must be able to decrypt or compute against. There is no known mechanism by which a delegate that doesn't hold the owner's decryption key could construct a valid proof for a confidential spend on the owner's behalf, the way plain `Approve` lets a delegate spend against a plaintext cap today. This was not verified empirically (no spike was run — Path 2 was deferred rather than built, see spec-001.md), so this is recorded as a strong, reasoned suspicion grounded in how the two mechanisms are structured, not a confirmed dead end — but it's exactly the kind of assumption that burned the sibling project's own Phase 0.5 (`PermissionedBurn` assumed supported, found not to be, only after being built against). Named here so a future attempt at Path 2 starts from this open question rather than re-discovering it.
 
 Secondary, independent risk found the same way: Confidential Transfer's zero-knowledge proof data is large, and historically has needed separate transactions or context-state accounts to fit at all — a real threat to Phase 4's single-transaction atomicity claim, which is already close to Solana's ~1232-byte limit combining just a memo, the Transfer Hook's resolved extra accounts, and one plain instruction (see Phase 4's own memo-trimming entry, above).
+
+## Phase 8 — `solana program deploy`'s own auto-extend math can request less than the loader's minimum increment
+
+A third real deploy-tooling incompatibility, distinct from Phase 3's `anchor deploy`/`ExtendProgram`-vs-`ExtendProgramChecked` finding: deploying the small `buyer_default_claim` addition via plain `solana program deploy` (the already-established workaround for Phase 3's issue) failed outright:
+
+```
+ExtendProgram requires a minimum of 10240 additional bytes or to extend to maximum size, but only 5096 were requested
+```
+
+`solana program deploy` computes how many bytes to request for `ExtendProgram` from the actual size difference between the currently-deployed program and the new binary — here, 5,096 bytes — but the BPF Loader Upgradeable program enforces its own minimum increment (10,240 bytes) per extend call, independent of what was actually requested. A small enough change (this one, versus the much larger jump from Phase 1's skeleton to Phase 3's first real instruction) can fall below that floor and get rejected outright. Reproduced deterministically on a clean retry, not a one-off network flake.
+
+**Workaround:** extend the program's allocation manually first, past the loader's minimum, before deploying:
+
+```
+solana program extend <PROGRAM_ID> 10240 --url <RPC_URL>
+solana program deploy target/deploy/depository.so --program-id target/deploy/depository-keypair.json --url <RPC_URL> --upgrade-authority ~/.config/solana/id.json
+```
+
+Both failed deploy attempts printed a recovery seed phrase and a `solana program close <buffer>` cleanup command for an "intermediate account" — turned out to be unnecessary here: both attempts failed at transaction *simulation* (never broadcast, per the `RPC response error -32002: Transaction simulation failed` prefix), so no buffer account was ever actually created on-chain and there was nothing to reclaim. Worth checking with `solana program close` before assuming rent is stuck, rather than assuming the recovery instructions always apply literally.

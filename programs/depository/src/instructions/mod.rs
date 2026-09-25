@@ -1,3 +1,4 @@
+pub mod buyer_default_claim;
 pub mod exercise_rehypothecation;
 pub mod open_pledge;
 pub mod release_pledge;
@@ -13,6 +14,7 @@ pub mod seller_default_claim;
 // harmless; suppressed explicitly rather than worked around.
 #[allow(ambiguous_glob_reexports)]
 mod reexports {
+    pub use super::buyer_default_claim::*;
     pub use super::exercise_rehypothecation::*;
     pub use super::open_pledge::*;
     pub use super::release_pledge::*;

@@ -69,6 +69,12 @@ pub mod depository {
     pub fn seller_default_claim(ctx: Context<SellerDefaultClaim>, decimals: u8) -> Result<()> {
         instructions::seller_default_claim::handler(ctx, decimals)
     }
+
+    /// Phase 8 (plan-001.md): Buyer-default claim (status-only).
+    /// See instructions::buyer_default_claim::handler.
+    pub fn buyer_default_claim(ctx: Context<BuyerDefaultClaim>) -> Result<()> {
+        instructions::buyer_default_claim::handler(ctx)
+    }
 }
 
 #[derive(Accounts)]
