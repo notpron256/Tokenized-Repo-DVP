@@ -62,9 +62,11 @@ import { waitForFinalized } from "./lib/finality.js";
 
 const MEMO_PROGRAM_V3 = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
-// fixtures/devnet-accounts.md
-const BUYER_CLIENT_ID = "22056748-4d61-4413-ac87-db38b012f427";
-const SELLER_CLIENT_ID = "6e6be62e-48da-454b-8d7a-eb24844eb548";
+// fixtures/devnet-accounts.md — overridable so Module 4's devnet tests
+// can use freshly-onboarded clients per run (a clean velocity window
+// every time) instead of these long-lived, heavily-exercised fixtures.
+const DEFAULT_BUYER_CLIENT_ID = "22056748-4d61-4413-ac87-db38b012f427";
+const DEFAULT_SELLER_CLIENT_ID = "6e6be62e-48da-454b-8d7a-eb24844eb548";
 
 // Operational default for trades opened from here on (distinct from
 // spec-001.md's documented $1,000,000 canonical Example trade, which
@@ -94,6 +96,8 @@ async function main() {
   // default for casual future trades. Ignored when --negative-test is set
   // (that path always uses the fixed, deliberately-invalid figure).
   const argValue = (flag: string) => process.argv.find((a) => a.startsWith(`--${flag}=`))?.split("=")[1];
+  const BUYER_CLIENT_ID = argValue("buyer-client-id") ?? DEFAULT_BUYER_CLIENT_ID;
+  const SELLER_CLIENT_ID = argValue("seller-client-id") ?? DEFAULT_SELLER_CLIENT_ID;
   const faceValueRaw = argValue("face-value-raw") ? BigInt(argValue("face-value-raw")!) : FACE_VALUE_RAW;
   const closeCashAmountRaw = argValue("close-cash-amount-raw") ? BigInt(argValue("close-cash-amount-raw")!) : CLOSE_CASH_AMOUNT_RAW;
   const validCashAmountRaw = argValue("cash-amount-raw") ? BigInt(argValue("cash-amount-raw")!) : VALID_CASH_AMOUNT_RAW;
@@ -213,6 +217,22 @@ async function main() {
     console.log();
     console.log(`TRANSACTION SUCCEEDED (confirmed): ${signature}`);
     console.log(`Trade-state address: ${tradeState.publicKey.toBase58()}`);
+
+    if (negativeTest) {
+      // The whole point of --negative-test is that this transaction must
+      // fail — reaching here means the deliberately invalid amount
+      // landed anyway, a real atomicity violation, not a benign outcome.
+      // Exit loudly and non-zero instead of falling through to a
+      // normal-looking success report. Found by mutation-testing
+      // tests/devnet/atomicity.test.ts's own negative-path test: without
+      // this, an unexpected success here was indistinguishable from an
+      // expected failure to anything checking this script's exit code
+      // (see project-findings-and-working-notes.md).
+      console.error();
+      console.error("NEGATIVE TEST FAILED: the deliberately invalid transaction unexpectedly SUCCEEDED — this is a real atomicity bug, not the expected outcome.");
+      process.exitCode = 1;
+      return;
+    }
 
     // Bounded consistency window (see spec-001.md's Areas of concern and
     // project-findings-and-working-notes.md): the on-chain settlement is
