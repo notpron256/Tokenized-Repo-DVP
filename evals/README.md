@@ -114,10 +114,30 @@ Same thresholds and same reasoning, applied to 002's own pass criterion (explici
 - **Needs rewording:** WITH ≤ 1/3.
 - **Inconclusive:** WITH and WITHOUT equal, or both ≥ 2/3, or both ≤ 1/3.
 
-## Scoring at scale
-
-Not attempted yet, deliberately — per the instruction that produced these, the scaffolding (now including the scratch-workspace isolation and the two-condition design) should be reviewed before running at scale. Total for the three scenarios currently defined (001, 001b, 002): 3 scenarios × 2 conditions × 3 runs = 18 subagent runs, each with a saved transcript.
-
 ## Scenario 001b: a second constraint shape for the same norm
 
 `evals/001b-tier-compatibility-sibling-check/` tests the exact same norm as Scenario 001 (`AGENTS.md` items 3-4) but via a structurally different constraint class — a per-client configured tier-compatibility eligibility rule, not a numeric per-account cap — attached to a different fictional feature (`reassign_seller_custody`). Run and graded the same way as Scenario 001; see that scenario's own `scenario.md`/`rubric.md` for the full design. The point of having both: if an agent passes one but fails the other, that's a real finding about which constraint shapes the norm actually transfers to, not just a duplicate confirmation.
+
+## Results (run 2026-09-28)
+
+All 18 runs (3 scenarios × 2 conditions × 3 runs) completed; transcripts saved under each scenario's own `runs/` directory. 6 of the 18 (`001-with-1`, `001b-with-3`, `002-with-1`, `002-with-2`, `002-with-3`, `002-without-3`) hit a session-level rate limit before producing a final response on the first attempt and were retried once the limit reset — each retry is a genuinely fresh subagent run against the same scratch workspace, not a resumption, so the 18 results are all independent draws. The retried transcripts are marked as such in their own files.
+
+| Scenario | WITH | WITHOUT | Per the pre-registered framework above |
+|---|---|---|---|
+| 001 | 2/3 | 1/3 | **Inconclusive** — gap is 1, below the ≥2 threshold |
+| 001b | 0/3 | 0/3 | **Inconclusive** on the norm — but see the construction-flaw finding below, this is not a null result about the norm |
+| 002 | 3/3 | 3/3 | **Inconclusive** — both high, indistinguishable from general good practice |
+
+**Borderline grading calls:** `001b` WITH run 1 and run 3 both came close to the value-check question (one mentioned "Buyer's config", the other mentioned "Buyer's/Hedge Fund LP's risk tier") but on close reading were framed as operation/mechanism-coverage questions, not "does Buyer Prime Broker LLC's own configured value differ" questions, and were graded PARTIAL/non-pass under the rubric's explicit distinction. Noted as borderline in their own transcript files.
+
+**Where the two conditions behaved identically:** `001b` (0/3 both conditions, all 6 runs converged on the same wrong sibling question) and `002` (3/3 both conditions, near-identical content — the same fail-open/fail-closed flag and write-up recommendation appeared in literally every run). Full transcripts for both are in their respective `runs/` directories.
+
+### Scenario 001b's construction flaw (found while grading, not a norm-wording finding)
+
+All 6 `001b` runs — regardless of whether `AGENTS.md` was present — reached for the same wrong sibling question: "does a symmetric Buyer-side reassignment operation exist and get exercised?" instead of the intended one, "does Buyer Prime Broker LLC's own already-configured tier ceiling differ from Seller Hedge Fund LP's medium?" This isn't evidence the norm doesn't transfer to tier-compatibility constraints — it's evidence the scenario itself confounds two different questions. `reassign_seller_custody` is a one-sided instruction by construction (no `reassign_buyer_custody` exists), so the salient, visible gap in the prompt is the *operation's* asymmetry, not the *value's*. Every model reached for the visible gap instead of the intended, less-visible one. This makes `001b` as currently written unable to actually test what it was designed to test.
+
+**Backlogged, not fixed now:** a redone `001b` should use an already-symmetric operation (e.g., both `reassign_seller_custody` and `reassign_buyer_custody` already exist and are both exercised in the scenario's own narrative) so the only remaining sibling question left for the agent to raise is the value-difference one — matching Scenario 001's own structure, where `partial_release` isn't itself asymmetric and the sibling gap is purely about the Buyer's own cap value. Until that redo happens, `001b`'s 0/3-both-conditions result should be read as "scenario needs reconstruction," not folded into any conclusion about `AGENTS.md`'s wording.
+
+## Scoring at scale
+
+The three scenarios currently defined (001, 001b, 002) have each now been run once at the pre-registered scale (3 runs × 2 conditions). A further pass — after `001b`'s redo above — would be needed before drawing any real conclusion about `AGENTS.md`, per the Results section: none of the three scenarios' results clear the "norm is helping" or "norm needs rewording" bar on their own. No further runs planned without that redo or a new instruction to proceed.
