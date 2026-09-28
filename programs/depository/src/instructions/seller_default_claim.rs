@@ -25,6 +25,7 @@ use anchor_lang::solana_program::program::invoke_signed;
 
 use crate::constants::{DEPOSITORY_AUTHORITY_SEED, GRACE_PERIOD_SECONDS};
 use crate::error::DepositoryError;
+use crate::grace_period::grace_period_elapsed;
 use crate::state::{CollateralLocation, TradeState, TradeStatus};
 
 const TRANSFER_CHECKED_DISCRIMINATOR: u8 = 12;
@@ -44,11 +45,9 @@ pub fn handler(ctx: Context<SellerDefaultClaim>, decimals: u8) -> Result<()> {
         );
 
         let now = Clock::get()?.unix_timestamp;
-        let deadline = trade_state
-            .scheduled_close_unix
-            .checked_add(GRACE_PERIOD_SECONDS)
-            .ok_or(DepositoryError::Overflow)?;
-        require!(now >= deadline, DepositoryError::GracePeriodNotElapsed);
+        let elapsed = grace_period_elapsed(now, trade_state.scheduled_close_unix, GRACE_PERIOD_SECONDS)
+            .map_err(|e| Error::from(e))?;
+        require!(elapsed, DepositoryError::GracePeriodNotElapsed);
     }
 
     let face_value = ctx.accounts.trade_state.face_value;

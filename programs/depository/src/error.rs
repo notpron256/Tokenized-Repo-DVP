@@ -16,4 +16,8 @@ pub enum DepositoryError {
     Overflow,
     #[msg("Provided account does not match the trade-state's recorded account")]
     AccountMismatch,
+    #[msg("Seller's custodied account already has a live delegate — one open pledge per custodied account only")]
+    AccountAlreadyPledged,
+    #[msg("Seller's custodied account data is too short to be a valid SPL Token account")]
+    InvalidTokenAccountData,
 }

@@ -34,6 +34,21 @@ pub fn handler(
 ) -> Result<()> {
     require!(security_id.len() <= 9, DepositoryError::SecurityIdTooLong);
 
+    // One open pledge per custodied account (spec-001.md's Token design):
+    // `Approve` below is unconditional and would otherwise silently
+    // overwrite a still-live delegate from an earlier, still-Open trade
+    // sharing this same custodied account. Checked by reading the SPL
+    // Token account's raw `delegate: COption<Pubkey>` field directly
+    // (offset 72 = mint(32) + owner(32) + amount(8); a 4-byte LE tag,
+    // 0 = None, 1 = Some) rather than depending on the `spl-token` crate,
+    // consistent with this program's existing manual-CPI convention.
+    {
+        let data = ctx.accounts.seller_custodied_account.try_borrow_data()?;
+        require!(data.len() >= 76, DepositoryError::InvalidTokenAccountData);
+        let delegate_tag = u32::from_le_bytes(data[72..76].try_into().unwrap());
+        require!(delegate_tag == 0, DepositoryError::AccountAlreadyPledged);
+    }
+
     let trade_state = &mut ctx.accounts.trade_state;
     trade_state.security_id = security_id;
     trade_state.face_value = face_value;
