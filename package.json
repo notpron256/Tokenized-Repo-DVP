@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "create-security-mint": "tsx scripts/create-security-mint.ts",
-    "open-trade": "tsx scripts/open-trade.ts"
+    "open-trade": "tsx scripts/open-trade.ts",
+    "test:local": "tsx --test tests/local/depository.test.ts",
+    "test:ledger": "tsx --test tests/ledger/mirror-idempotency.test.ts",
+    "test:devnet": "tsx tests/devnet/guard.ts && tsx --test tests/devnet/atomicity.test.ts",
+    "test": "npm run test:local && npm run test:ledger"
   },
   "dependencies": {
     "@solana/spl-token": "^0.4.15",
